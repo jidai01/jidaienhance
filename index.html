@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Photo Enhancer — Ultra HD</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◆</span>
+      <div class="brand-text">
+        <h1>Photo Enhancer</h1>
+        <p>Ultra HD · Restore sharp focus · Preserve composition</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="btnPick" class="btn primary">Pilih Gambar</button>
+      <button id="btnDownload" class="btn" disabled>Download Hasil</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage">
+      <div class="dropzone" id="dropzone" tabindex="0">
+        <div class="drop-inner">
+          <div class="drop-icon">⬆</div>
+          <h2>Tarik foto ke sini</h2>
+          <p>atau klik untuk memilih file · bisa juga paste (Ctrl+V)</p>
+          <p class="hint">JPG · PNG · WEBP · BMP</p>
+        </div>
+      </div>
+
+      <div class="compare hidden" id="compare">
+        <div class="frame" id="frame">
+          <img id="origImg" alt="Foto asli">
+          <div class="after" id="afterLayer">
+            <canvas id="outCanvas"></canvas>
+          </div>
+          <div class="handle" id="handle">
+            <span class="grip">⇔</span>
+          </div>
+          <span class="tag tag-left">Sebelum</span>
+          <span class="tag tag-right">Sesudah</span>
+        </div>
+        <div class="file-meta" id="fileMeta"></div>
+      </div>
+
+      <div class="busy hidden" id="busy">
+        <div class="spinner"></div>
+        <span>Memproses…</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="card prompt-card">
+        <div class="card-head">
+          <h3>Enhance Prompt</h3>
+          <button class="mini" id="btnCopy">Salin</button>
+        </div>
+        <blockquote id="promptText">Ultra high-definition image, enhance resolution and clarity, restore sharp focus, remove blur and noise, increase fine detail while preserving the original image. STRICTLY preserve original composition, framing, pose, perspective, and object identity. Do not change or modify any structure from this picture.</blockquote>
+        <button class="btn accent" id="btnAuto" disabled>Terapkan Preset Prompt</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Parameter</h3><button class="mini" id="btnReset">Reset</button></div>
+
+        <label class="field">
+          <span class="field-name">Upscale Resolusi</span>
+          <select id="scale">
+            <option value="1">1× (original)</option>
+            <option value="2" selected>2× (Ultra HD)</option>
+            <option value="3">3×</option>
+            <option value="4">4×</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field-name">Denoise (hilangkan noise) <b id="vDenoise"></b></span>
+          <input type="range" id="denoise" min="0" max="100" value="60">
+        </label>
+
+        <label class="field">
+          <span class="field-name">Clarity (fine detail) <b id="vClarity"></b></span>
+          <input type="range" id="clarity" min="0" max="100" value="65">
+        </label>
+
+        <label class="field">
+          <span class="field-name">Sharpen (restorasi fokus) <b id="vSharpen"></b></span>
+          <input type="range" id="sharpen" min="0" max="100" value="85">
+        </label>
+
+        <label class="field">
+          <span class="field-name">Kontras <b id="vContrast"></b></span>
+          <input type="range" id="contrast" min="0" max="100" value="15">
+        </label>
+
+        <label class="field">
+          <span class="field-name">Saturasi <b id="vSaturation"></b></span>
+          <input type="range" id="saturation" min="0" max="100" value="12">
+        </label>
+
+        <label class="field">
+          <span class="field-name">Format Download</span>
+          <select id="format">
+            <option value="png">PNG (lossless)</option>
+            <option value="jpeg">JPG (kualitas 92%)</option>
+            <option value="webp">WEBP (kualitas 92%)</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="card note">
+        <h3>Catatan</h3>
+        <p>Semua proses berjalan <b>lokal di browser</b> — tidak ada gambar yang diunggah ke server. Komposisi, framing, pose, perspektif, dan identitas objek dipertahankan; hanya resolusi, ketajaman, dan noise yang diperbaiki.</p>
+      </div>
+    </aside>
+  </main>
+
+  <input type="file" id="fileInput" accept="image/*" hidden>
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
