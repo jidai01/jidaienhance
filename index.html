@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Photo Enhancer — Ultra HD</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312162a'/%3E%3Cpath d='M16 6l8 10-8 10-8-10z' fill='%234fd1c5'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -28,7 +29,7 @@
           <div class="drop-icon">⬆</div>
           <h2>Tarik foto ke sini</h2>
           <p>atau klik untuk memilih file · bisa juga paste (Ctrl+V)</p>
-          <p class="hint">JPG · PNG · WEBP · BMP</p>
+          <p class="hint">JPG · PNG · WEBP · BMP · HEIC</p>
         </div>
       </div>
 
@@ -49,7 +50,9 @@
 
       <div class="busy hidden" id="busy">
         <div class="spinner"></div>
-        <span>Memproses…</span>
+        <span id="busyLabel">Memproses…</span>
+        <div class="bar"><i id="busyBar"></i></div>
+        <button class="mini" id="btnCancel">Batal</button>
       </div>
     </section>
 
@@ -118,9 +121,10 @@
     </aside>
   </main>
 
-  <input type="file" id="fileInput" accept="image/*" hidden>
+  <input type="file" id="fileInput" accept="image/*,.heic,.heif" hidden>
   <div class="toast" id="toast"></div>
 
+  <script src="filters.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
