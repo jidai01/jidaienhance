@@ -9,7 +9,6 @@ const els = {
   btnDownload: $('btnDownload'),
   btnAuto: $('btnAuto'),
   btnReset: $('btnReset'),
-  btnRemoveBg: $('btnRemoveBg'),
   btnCopy: $('btnCopy'),
   btnCancel: $('btnCancel'),
   compare: $('compare'),
@@ -54,11 +53,6 @@ let fullTimer = null;
 let busyTimer = null;
 let busyOn = false;
 let lastUrl = null;
-let cutoutImage = null;
-let cutoutActive = false;
-let bgModule = null;
-let bgToken = 0;
-let bgBusy = false;
 
 function toast(msg) {
   els.toast.textContent = msg;
@@ -99,12 +93,6 @@ function updateLabels() {
   $('vSharpen').textContent = els.sharpen.value;
   $('vContrast').textContent = els.contrast.value;
   $('vSaturation').textContent = els.saturation.value;
-}
-
-function updateBgButton() {
-  els.btnRemoveBg.disabled = !sourceImage || bgBusy;
-  els.btnRemoveBg.classList.toggle('active', cutoutActive);
-  els.btnRemoveBg.textContent = cutoutActive ? 'Kembalikan Latar' : 'Hapus Latar';
 }
 
 /* ---------- settings persistence ---------- */
@@ -152,7 +140,7 @@ function applySmartDefaults() {
 /* ---------- image loading ---------- */
 
 function buildSource() {
-  const img = cutoutActive && cutoutImage ? cutoutImage : sourceImage;
+  const img = sourceImage;
   const natW = img.naturalWidth;
   const natH = img.naturalHeight;
   const [w, h, wasClamped] = clampDims(natW, natH);
@@ -190,9 +178,6 @@ function loadFile(file) {
     els.btnAuto.disabled = false;
     baseKey = '';
     downloadPending = false;
-    cutoutImage = null;
-    cutoutActive = false;
-    updateBgButton();
     if (!buildSource()) { toast('Gagal memuat gambar'); return; }
     updateMeta(file.size);
     if (!loadSettings()) applySmartDefaults();
@@ -213,10 +198,9 @@ function updateMeta(size) {
   const sh = sourceData ? sourceData.height : h0;
   const [w1, h1] = clampDims(sw * +els.scale.value, sh * +els.scale.value);
   const kb = size ? ` · ${(size / 1024).toFixed(0)} KB` : '';
-  const bgTag = cutoutActive ? ' · Latar dihapus' : '';
   els.fileMeta.innerHTML =
     `Asli <b>${w0}×${h0}</b> → Hasil <b>${w1}×${h1}</b> · ` +
-    `Enhance dijalankan lokal di browser${bgTag}${kb}`;
+    `Enhance dijalankan lokal di browser${kb}`;
 }
 
 /* ---------- render (worker with sync fallback) ---------- */
@@ -433,87 +417,10 @@ els.btnReset.addEventListener('click', () => {
   renderNow();
 });
 
-els.btnRemoveBg.addEventListener('click', async () => {
-  if (!sourceImage || bgBusy) return;
-  if (cutoutActive) {
-    cutoutActive = false;
-    updateBgButton();
-    buildSource();
-    renderNow();
-    toast('Latar dikembalikan');
-    return;
-  }
-  if (cutoutImage) {
-    cutoutActive = true;
-    updateBgButton();
-    buildSource();
-    renderNow();
-    toast('Latar dihapus');
-    return;
-  }
-  const myToken = ++bgToken;
-  bgBusy = true;
-  updateBgButton();
-  setBusy(true);
-  els.busyBar.style.width = '0%';
-  els.busyLabel.textContent = 'Menghapus latar…';
-  try {
-    if (!bgModule) {
-      bgModule = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm');
-    }
-    if (myToken !== bgToken) return;
-    const resp = await fetch(els.origImg.src);
-    const blob = await resp.blob();
-    if (myToken !== bgToken) return;
-    const out = await bgModule.removeBackground(blob, {
-      model: 'isnet_fp16',
-      progress: (key, current, total) => {
-        if (myToken !== bgToken || !total) return;
-        const frac = Math.min(1, current / total);
-        const fetching = String(key).startsWith('fetch');
-        const pct = Math.round(fetching ? 4 + 46 * frac : 55 + 40 * frac);
-        els.busyBar.style.width = pct + '%';
-        els.busyLabel.textContent = (fetching ? 'Mengunduh model ' : 'Menghapus latar ') + pct + '%';
-      },
-    });
-    if (myToken !== bgToken) return;
-    const url = URL.createObjectURL(out);
-    const img = await new Promise((res, rej) => {
-      const im = new Image();
-      im.onload = () => res(im);
-      im.onerror = () => rej(new Error('cutout decode'));
-      im.src = url;
-    });
-    if (myToken !== bgToken) return;
-    cutoutImage = img;
-    cutoutActive = true;
-    bgBusy = false;
-    setBusy(false);
-    updateBgButton();
-    buildSource();
-    updateMeta();
-    renderNow();
-    toast('Latar dihapus — PNG/WEBP menjaga transparansi');
-  } catch (err) {
-    console.error(err);
-    if (myToken === bgToken) {
-      bgBusy = false;
-      setBusy(false);
-      updateBgButton();
-      toast('Gagal menghapus latar — unduhan model pertama butuh koneksi');
-    }
-  }
-});
-
 els.btnCancel.addEventListener('click', () => {
   clearTimeout(previewTimer);
   clearTimeout(fullTimer);
   renderSeq++;
-  bgToken++;
-  if (bgBusy) {
-    bgBusy = false;
-    updateBgButton();
-  }
   killWorker();
   setBusy(false);
   toast('Proses dibatalkan');
@@ -537,12 +444,7 @@ els.btnCopy.addEventListener('click', async () => {
 
 function doDownload() {
   if (!els.outCanvas.width) return;
-  let fmt = els.format.value;
-  if (cutoutActive && fmt === 'jpeg') {
-    fmt = 'png';
-    els.format.value = 'png';
-    toast('Format diganti ke PNG — JPG tidak mendukung transparansi');
-  }
+  const fmt = els.format.value;
   const mime = fmt === 'png' ? 'image/png' : fmt === 'jpeg' ? 'image/jpeg' : 'image/webp';
   const ext = fmt === 'jpeg' ? 'jpg' : fmt;
   els.outCanvas.toBlob(
@@ -581,5 +483,4 @@ window.addEventListener('beforeunload', () => {
 const savedSettings = loadSettings();
 if (savedSettings) applySettings(savedSettings);
 updateLabels();
-updateBgButton();
 setPos(50);
