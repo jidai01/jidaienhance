@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Photo Enhancer — Beranda</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312162a'/%3E%3Cpath d='M16 6l8 10-8 10-8-10z' fill='%234fd1c5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◆</span>
+      <div class="brand-text">
+        <h1>Photo Enhancer</h1>
+        <p>Ultra HD · Restore sharp focus · Preserve composition</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a href="index.html" class="btn primary">Buka Editor</a>
+    </div>
+  </header>
+
+  <main class="dash">
+    <section class="hero">
+      <span class="logo hero-logo">◆</span>
+      <h2>Perbaiki foto tanpa mengubah komposisinya</h2>
+      <p class="sub">Upscale, denoise, dan restorasi ketajaman — semua berjalan
+        <b>lokal di browser</b> kamu. Tidak ada foto yang diunggah ke mana pun.</p>
+      <div class="hero-actions">
+        <a href="index.html" class="btn primary">Mulai Enhance</a>
+        <a href="#fitur" class="btn">Lihat Fitur</a>
+      </div>
+    </section>
+
+    <h3 class="dash-title" id="fitur">Fitur</h3>
+    <section class="features">
+      <article class="card feature">
+        <div class="f-icon">◈</div>
+        <h4>Enhance Ultra HD</h4>
+        <p>Denoise, clarity, sharpen, kontras, dan saturasi dengan parameter presisi — mengikuti prompt enhance ketat yang menjaga identitas objek.</p>
+      </article>
+      <article class="card feature">
+        <div class="f-icon">⤢</div>
+        <h4>Upscale 2×–4×</h4>
+        <p>Resampling Lanczos yang dibatasi terhadap bilinear — tajam tanpa ringing artifact.</p>
+      </article>
+      <article class="card feature">
+        <div class="f-icon">✂</div>
+        <h4>Hapus Latar</h4>
+        <p>Model AI background removal berjalan lokal di perangkat. Hasil PNG/WEBP dengan transparansi, bisa di-toggle bolak-balik.</p>
+      </article>
+      <article class="card feature">
+        <div class="f-icon">⇔</div>
+        <h4>Compare Sebelum/Sesudah</h4>
+        <p>Slider perbandingan real-time plus preview hidup saat menggeser parameter.</p>
+      </article>
+      <article class="card feature">
+        <div class="f-icon">⚙</div>
+        <h4>Web Worker + Progress</h4>
+        <p>Pemrosesan di background thread — UI tetap responsif, progress bar detail, dan bisa dibatalkan.</p>
+      </article>
+      <article class="card feature">
+        <div class="f-icon">✦</div>
+        <h4>Smart Defaults</h4>
+        <p>Parameter dihitung otomatis dari tingkat noise foto pertama kali dibuka; sekali kamu atur manual, pilihanmu yang dipakai.</p>
+      </article>
+    </section>
+
+    <h3 class="dash-title">Cara Kerja</h3>
+    <section class="steps">
+      <div class="card step">
+        <span class="step-num">1</span>
+        <h4>Pilih foto</h4>
+        <p>Tarik & drop, klik, atau paste (Ctrl+V). JPG · PNG · WEBP · BMP · HEIC.</p>
+      </div>
+      <div class="card step">
+        <span class="step-num">2</span>
+        <h4>Atur parameter</h4>
+        <p>Terapkan preset prompt atau geser manual; toggle Hapus Latar bila perlu.</p>
+      </div>
+      <div class="card step">
+        <span class="step-num">3</span>
+        <h4>Preview & download</h4>
+        <p>Cek lewat slider compare, lalu unduh PNG · JPG · WEBP sesuai kebutuhan.</p>
+      </div>
+    </section>
+
+    <section class="card note dash-note">
+      <h3>Privasi</h3>
+      <p>Semua proses — enhance maupun background removal — berjalan di perangkat kamu lewat Web Worker dan WebAssembly. Foto tidak pernah dikirim ke server; model AI (~80&nbsp;MB) diunduh sekali dari CDN lalu disimpan di cache browser.</p>
+    </section>
+
+    <footer class="dash-foot">
+      <a href="index.html">Buka Editor →</a>
+    </footer>
+  </main>
+</body>
+</html>
