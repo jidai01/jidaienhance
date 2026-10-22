@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kompres Gambar — Photo Enhancer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312162a'/%3E%3Cpath d='M16 6l8 10-8 10-8-10z' fill='%234fd1c5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◆</span>
+      <div class="brand-text">
+        <h1>Photo Enhancer</h1>
+        <p>Ultra HD · Restore sharp focus · Preserve composition</p>
+      </div>
+    </div>
+    <nav class="top-nav">
+      <a href="dashboard.html" class="btn">Beranda</a>
+      <a href="index.html" class="btn">Editor</a>
+      <a href="removebg.html" class="btn">Hapus Latar</a>
+      <a href="compress.html" class="btn active">Compress</a>
+    </nav>
+    <div class="top-actions">
+      <button id="cPick" class="btn primary">Pilih Foto</button>
+      <button id="cDownload" class="btn" disabled>Download Hasil</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage">
+      <div class="dropzone" id="cDropzone" tabindex="0">
+        <div class="drop-inner">
+          <div class="drop-icon">⤓</div>
+          <h2>Tarik foto ke sini</h2>
+          <p>atau klik untuk memilih file · bisa juga paste (Ctrl+V)</p>
+          <p class="hint">JPG · PNG · WEBP · BMP · HEIC</p>
+        </div>
+      </div>
+
+      <div class="compare hidden" id="cView">
+        <div class="frame" id="cFrame">
+          <img id="cOrig" alt="Foto asli">
+          <div class="after" id="cAfterLayer">
+            <canvas id="cCanvas" class="checker"></canvas>
+          </div>
+          <div class="handle" id="cHandle">
+            <span class="grip">⇔</span>
+          </div>
+          <span class="tag tag-left">Asli</span>
+          <span class="tag tag-right">Kompres</span>
+        </div>
+        <div class="file-meta" id="cMeta"></div>
+      </div>
+
+      <div class="busy hidden" id="cBusy">
+        <div class="spinner"></div>
+        <span id="cLabel">Mengompres…</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="card">
+        <div class="card-head"><h3>Kompresi</h3></div>
+
+        <label class="field">
+          <span class="field-name">Format</span>
+          <select id="cFormat">
+            <option value="jpeg" selected>JPG (lossy)</option>
+            <option value="webp">WEBP (lossy)</option>
+            <option value="png">PNG (lossless)</option>
+          </select>
+        </label>
+
+        <label class="field" id="cQualityField">
+          <span class="field-name">Kualitas <b id="cVQuality">80</b></span>
+          <input type="range" id="cQuality" min="1" max="100" value="80">
+        </label>
+
+        <label class="field">
+          <span class="field-name">Ukuran Maks (sisi terpanjang)</span>
+          <select id="cMaxSize">
+            <option value="0" selected>Original</option>
+            <option value="4096">4096 px</option>
+            <option value="2048">2048 px</option>
+            <option value="1600">1600 px</option>
+            <option value="1280">1280 px</option>
+            <option value="800">800 px</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="card note">
+        <h3>Catatan</h3>
+        <p>JPG/WEBP memakai <b>quality lossy</b> — pilih angka lebih kecil untuk
+          file lebih kecil; PNG <b>lossless</b> cocok untuk screenshot/ikon.
+          Pengompresan berjalan <b>lokal di browser</b>, foto tidak diunggah ke
+          server mana pun.</p>
+      </div>
+
+      <div class="card note">
+        <h3>Butuh yang lain?</h3>
+        <p>Perbaiki ketajaman di <a href="index.html">Editor Enhance</a>,
+          atau buat transparan di <a href="removebg.html">Hapus Latar</a> —
+          atau <a href="dashboard.html">kembali ke beranda</a>.</p>
+      </div>
+    </aside>
+  </main>
+
+  <input type="file" id="cFileInput" accept="image/*,.heic,.heif" hidden>
+  <div class="toast" id="cToast"></div>
+
+  <script src="filters.js"></script>
+  <script src="compress.js"></script>
+</body>
+</html>

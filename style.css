@@ -472,3 +472,18 @@ a.feature:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
 }
+
+/* —— Unified navbar —— */
+.topbar { flex-wrap: wrap; }
+.top-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.top-nav .btn { font-weight: 600; }
+
+/* —— Compress —— */
+.stat-ok { color: var(--ok); }
+.stat-warn { color: #ff9d5c; }
+.field.disabled { opacity: .45; }
