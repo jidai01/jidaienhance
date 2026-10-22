@@ -40,48 +40,58 @@
       </div>
 
       <div class="compare hidden" id="rbView">
-        <div class="frame" id="rbFrame">
-          <img id="rbOrig" alt="Foto asli">
-          <div class="after" id="rbAfterLayer">
-            <canvas id="rbCanvas" class="checker"></canvas>
-          </div>
-          <div class="handle" id="rbHandle">
-            <span class="grip">⇔</span>
-          </div>
-          <span class="tag tag-left">Asli</span>
-          <span class="tag tag-right">Tanpa Latar</span>
+        <div class="wand-wrap">
+          <canvas id="rbCanvas" class="checker wand-canvas"></canvas>
         </div>
         <div class="file-meta" id="rbMeta"></div>
-      </div>
-
-      <div class="busy hidden" id="rbBusy">
-        <div class="spinner"></div>
-        <span id="rbLabel">Memproses…</span>
-        <div class="bar"><i id="rbBar"></i></div>
-        <button class="mini" id="rbCancel">Batal</button>
       </div>
     </section>
 
     <aside class="panel">
       <div class="card">
-        <div class="card-head"><h3>Cara Pakai</h3></div>
-        <p class="rb-copy">Pilih foto — pemrosesan berjalan otomatis. Geser slider
-          untuk membandingkan hasil dengan foto asli, lalu unduh sebagai PNG
-          (transparan) atau WEBP.</p>
+        <div class="card-head"><h3>Tongkat Sihir</h3></div>
+
+        <div class="wand-modes">
+          <button id="rbModeErase" class="btn active" type="button">Hapus</button>
+          <button id="rbModeRestore" class="btn" type="button">Pulihkan</button>
+        </div>
+
+        <label class="field wand-field">
+          <span class="field-name">Toleransi warna <b id="rbTolVal">30</b></span>
+          <input type="range" id="rbTol" min="0" max="100" value="30">
+        </label>
+
+        <label class="field wand-check">
+          <input type="checkbox" id="rbContig" checked>
+          Seleksi menyambung (hanya area yang bersentuhan)
+        </label>
+
+        <div class="wand-actions">
+          <button id="rbUndo" class="btn" type="button" disabled>↶ Undo</button>
+          <button id="rbReset" class="btn" type="button" disabled>Mulai Ulang</button>
+        </div>
+      </div>
+
+      <div class="card note">
+        <h3>Cara Pakai</h3>
+        <p>Klik bagian yang dianggap <b>latar belakang</b> — area seleksi warna
+          yang mirip langsung menjadi transparan (papan catur). Naikkan
+          <b>toleransi</b> bila seleksi kurang luas, turunkan bila meleset ke
+          objek. Centang <b>Seleksi menyambung</b> untuk hanya area yang
+          bersentuhan; hilangkan centang untuk menyeleksi warna serupa di
+          seluruh gambar. Mode <b>Pulihkan</b> mengembalikan bagian yang
+          terhapus, <b>Undo</b> melangkah mundur satu aksi, dan
+          <b>Mulai Ulang</b> mengembalikan foto ke kondisi awal.</p>
       </div>
 
       <div class="card note">
         <h3>Catatan</h3>
-        <p>Model AI (~80&nbsp;MB) diunduh <b>sekali</b> lalu disimpan di cache
-          browser; setelah itu bisa dipakai offline. Pemrosesan berjalan sepenuhnya
-          <b>lokal di browser</b> — foto tidak diunggah ke server mana pun.</p>
-      </div>
-
-      <div class="card note">
-        <h3>Butuh perbaikan ketajaman?</h3>
-        <p>Gunakan <a href="index.html">Editor Enhance</a> untuk upscale,
-          denoise, dan sharpen — atau <a href="dashboard.html">kembali ke
-          beranda</a>.</p>
+        <p>Semua berjalan <b>lokal di browser</b> — murni JavaScript, tanpa
+          unduhan model AI dan tanpa foto yang dikirim ke server. Hasil selalu
+          diunduh sebagai <b>PNG transparan</b>. Butuh perbaikan ketajaman?
+          Gunakan <a href="index.html">Editor Enhance</a>, kompres ukuran di
+          <a href="compress.html">Compress</a>, atau
+          <a href="dashboard.html">kembali ke beranda</a>.</p>
       </div>
     </aside>
   </main>

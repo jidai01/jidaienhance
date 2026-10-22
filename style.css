@@ -487,3 +487,30 @@ a.feature:hover {
 .stat-ok { color: var(--ok); }
 .stat-warn { color: #ff9d5c; }
 .field.disabled { opacity: .45; }
+
+/* —— Magic wand (hapus latar) —— */
+.wand-canvas {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 66vh;
+  margin: 0 auto;
+  border-radius: 8px;
+  cursor: crosshair;
+}
+.wand-wrap { width: 100%; }
+.wand-modes { display: flex; gap: 8px; }
+.wand-modes .btn { flex: 1; }
+.wand-field { margin-top: 14px; }
+.wand-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #b9c3d8;
+  cursor: pointer;
+}
+.wand-check input { margin: 0; }
+.wand-actions { display: flex; gap: 8px; margin-top: 4px; }
+.wand-actions .btn { flex: 1; }
