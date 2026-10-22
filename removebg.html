@@ -40,7 +40,7 @@
       </div>
 
       <div class="compare hidden" id="rbView">
-        <div class="wand-wrap">
+        <div class="wand-wrap" id="rbWrap">
           <canvas id="rbCanvas" class="checker wand-canvas"></canvas>
         </div>
         <div class="file-meta" id="rbMeta"></div>
@@ -68,8 +68,21 @@
 
         <div class="wand-actions">
           <button id="rbUndo" class="btn" type="button" disabled>↶ Undo</button>
+          <button id="rbRedo" class="btn" type="button" disabled>↷ Redo</button>
           <button id="rbReset" class="btn" type="button" disabled>Mulai Ulang</button>
         </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Zoom</h3></div>
+        <div class="zoom-row">
+          <button id="rbZoomOut" class="btn" type="button">−</button>
+          <span class="zoom-val" id="rbZoomVal">100%</span>
+          <button id="rbZoomIn" class="btn" type="button">+</button>
+          <button id="rbZoomFit" class="btn" type="button">Pas</button>
+        </div>
+        <p class="zoom-hint">Ctrl+scroll untuk zoom ke arah kursor · seret
+          gambar untuk menggeser saat diperbesar.</p>
       </div>
 
       <div class="card note">
@@ -80,7 +93,9 @@
           objek. Centang <b>Seleksi menyambung</b> untuk hanya area yang
           bersentuhan; hilangkan centang untuk menyeleksi warna serupa di
           seluruh gambar. Mode <b>Pulihkan</b> mengembalikan bagian yang
-          terhapus, <b>Undo</b> melangkah mundur satu aksi, dan
+          terhapus. <b>Undo</b> melangkah mundur dan <b>Redo</b> maju kembali
+          satu aksi — bisa juga lewat pintasan papan ketik
+          <b>Ctrl+Z</b> / <b>Ctrl+Y</b> (Ctrl+Shift+Z didukung).
           <b>Mulai Ulang</b> mengembalikan foto ke kondisi awal.</p>
       </div>
 

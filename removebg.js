@@ -17,7 +17,13 @@ const els = {
   tolVal: $('rbTolVal'),
   contig: $('rbContig'),
   undo: $('rbUndo'),
+  redo: $('rbRedo'),
   reset: $('rbReset'),
+  wrap: $('rbWrap'),
+  zoomIn: $('rbZoomIn'),
+  zoomOut: $('rbZoomOut'),
+  zoomFit: $('rbZoomFit'),
+  zoomVal: $('rbZoomVal'),
 };
 
 const ctx = els.canvas.getContext('2d', { willReadFrequently: true });
@@ -29,10 +35,12 @@ let fileName = 'photo';
 let fileSize = 0;
 let origData = null;      // ImageData at load — source of truth for reset/restore
 let curData = null;       // ImageData currently reflected on canvas
-let undoStack = [];       // [{idx: Int32Array, prev: Uint8Array}]
+let undoStack = [];       // [{idx: Int32Array, prev: Uint8Array, next: Uint8Array}]
+let redoStack = [];
 let mode = 'erase';
-let changed = false;
 let lastUrl = null;
+let zoom = 1;
+let baseFitW = 0;
 
 function toast(msg) {
   els.toast.textContent = msg;
@@ -49,7 +57,8 @@ function fmtSize(b) {
 
 function updateButtons() {
   els.undo.disabled = undoStack.length === 0;
-  els.reset.disabled = !changed;
+  els.redo.disabled = redoStack.length === 0;
+  els.reset.disabled = undoStack.length === 0;
   els.btnDownload.disabled = !sourceImage;
 }
 
@@ -63,6 +72,38 @@ function updateMeta() {
   els.meta.innerHTML =
     `Asli <b>${sourceImage.naturalWidth}×${sourceImage.naturalHeight}</b>${kb} → ` +
     `<b>PNG transparan</b> · dihapus <b>${pct}%</b> piksel · diproses lokal di browser`;
+}
+
+/* ---------- zoom / pan ---------- */
+
+function updateZoomLabel() {
+  els.zoomVal.textContent = Math.round(zoom * 100) + '%';
+}
+
+function computeBaseFit() {
+  const cw = els.canvas.width;
+  const ch = els.canvas.height;
+  if (!cw || !ch || !els.wrap.clientWidth) { baseFitW = 0; return; }
+  const availW = els.wrap.clientWidth;
+  const availH = Math.round(window.innerHeight * 0.66);
+  baseFitW = Math.min(availW, cw, availH * (cw / ch));
+}
+
+function setZoom(z, anchor) {
+  if (!origData || !baseFitW) return;
+  z = Math.min(8, Math.max(0.25, z));
+  const wrap = els.wrap;
+  const wr = wrap.getBoundingClientRect();
+  const ax = anchor ? anchor.x - wr.left : wrap.clientWidth / 2;
+  const ay = anchor ? anchor.y - wr.top : wrap.clientHeight / 2;
+  const contentX = (wrap.scrollLeft + ax) / zoom;
+  const contentY = (wrap.scrollTop + ay) / zoom;
+  zoom = z;
+  els.canvas.style.width = (baseFitW * zoom) + 'px';
+  els.canvas.style.height = 'auto';
+  wrap.scrollLeft = contentX * zoom - ax;
+  wrap.scrollTop = contentY * zoom - ay;
+  updateZoomLabel();
 }
 
 function loadFile(file) {
@@ -86,9 +127,12 @@ function loadFile(file) {
     origData = ctx.getImageData(0, 0, w, h);
     curData = origData;
     undoStack = [];
-    changed = false;
+    redoStack = [];
     els.dropzone.classList.add('hidden');
     els.view.classList.remove('hidden');
+    zoom = 1;
+    computeBaseFit();
+    setZoom(1);
     updateButtons();
     updateMeta();
     if (wasClamped) toast('Ukuran dipetakan ke maksimal ' + w + '×' + h);
@@ -146,12 +190,14 @@ function applyWand(px, py) {
   const picked = collectSelection(data, w, h, px, py, thresh);
   const idx = [];
   const prev = [];
+  const next = [];
   for (const p of picked) {
     const i = p * 4;
     const target = mode === 'erase' ? 0 : origData.data[i + 3];
     if (data[i + 3] !== target) {
       idx.push(p);
       prev.push(data[i + 3]);
+      next.push(target);
       data[i + 3] = target;
     }
   }
@@ -161,11 +207,15 @@ function applyWand(px, py) {
       : 'Tidak ada yang dipulihkan di area ini');
     return;
   }
-  undoStack.push({ idx: Int32Array.from(idx), prev: Uint8Array.from(prev) });
+  undoStack.push({
+    idx: Int32Array.from(idx),
+    prev: Uint8Array.from(prev),
+    next: Uint8Array.from(next),
+  });
   if (undoStack.length > UNDO_MAX) undoStack.shift();
+  redoStack = [];
   ctx.putImageData(img, 0, 0);
   curData = img;
-  changed = true;
   updateButtons();
   updateMeta();
 }
@@ -173,16 +223,32 @@ function applyWand(px, py) {
 function undo() {
   const action = undoStack.pop();
   if (!action || !origData) return;
+  applyAction(action, 'prev');
+  redoStack.push(action);
+  updateButtons();
+  updateMeta();
+}
+
+function redo() {
+  const action = redoStack.pop();
+  if (!action || !origData) return;
+  applyAction(action, 'next');
+  undoStack.push(action);
+  if (undoStack.length > UNDO_MAX) undoStack.shift();
+  updateButtons();
+  updateMeta();
+}
+
+function applyAction(action, which) {
   const w = els.canvas.width;
   const h = els.canvas.height;
   const img = ctx.getImageData(0, 0, w, h);
+  const vals = action[which];
   for (let k = 0; k < action.idx.length; k++) {
-    img.data[action.idx[k] * 4 + 3] = action.prev[k];
+    img.data[action.idx[k] * 4 + 3] = vals[k];
   }
   ctx.putImageData(img, 0, 0);
   curData = img;
-  updateButtons();
-  updateMeta();
 }
 
 function resetAll() {
@@ -190,7 +256,7 @@ function resetAll() {
   ctx.putImageData(origData, 0, 0);
   curData = origData;
   undoStack = [];
-  changed = false;
+  redoStack = [];
   updateButtons();
   updateMeta();
   toast('Foto dikembalikan ke kondisi awal');
@@ -209,14 +275,70 @@ els.modeRestore.addEventListener('click', () => setMode('restore'));
 
 els.tol.addEventListener('input', () => { els.tolVal.textContent = els.tol.value; });
 els.undo.addEventListener('click', undo);
+els.redo.addEventListener('click', redo);
 els.reset.addEventListener('click', resetAll);
 
+document.addEventListener('keydown', (e) => {
+  const k = (e.key || '').toLowerCase();
+  if (!(e.ctrlKey || e.metaKey) || (k !== 'z' && k !== 'y')) return;
+  e.preventDefault();
+  if (k === 'y') { redo(); return; }
+  if (e.shiftKey) redo();
+  else undo();
+});
+
+/* Click = wand (pointerup without drag); drag = pan when zoomed. */
+let pd = null;
 els.canvas.addEventListener('pointerdown', (e) => {
-  if (!origData) return;
+  if (!origData || pd) return;
+  const wrap = els.wrap;
+  pd = {
+    id: e.pointerId,
+    x: e.clientX,
+    y: e.clientY,
+    sl: wrap.scrollLeft,
+    st: wrap.scrollTop,
+    dragged: false,
+  };
+  try { els.canvas.setPointerCapture(e.pointerId); } catch { /* synthetic pointers */ }
+});
+els.canvas.addEventListener('pointermove', (e) => {
+  if (!pd || e.pointerId !== pd.id) return;
+  const dx = e.clientX - pd.x;
+  const dy = e.clientY - pd.y;
+  if (!pd.dragged && Math.hypot(dx, dy) > 5) pd.dragged = true;
+  if (pd.dragged) {
+    const wrap = els.wrap;
+    wrap.scrollLeft = pd.sl - dx;
+    wrap.scrollTop = pd.st - dy;
+  }
+});
+els.canvas.addEventListener('pointerup', (e) => {
+  if (!pd || e.pointerId !== pd.id) return;
+  const dragged = pd.dragged;
+  pd = null;
+  if (dragged) return;
   const rect = els.canvas.getBoundingClientRect();
   const px = Math.floor((e.clientX - rect.left) * (els.canvas.width / rect.width));
   const py = Math.floor((e.clientY - rect.top) * (els.canvas.height / rect.height));
   applyWand(px, py);
+});
+els.canvas.addEventListener('pointercancel', () => { pd = null; });
+
+els.zoomIn.addEventListener('click', () => setZoom(zoom * 1.5));
+els.zoomOut.addEventListener('click', () => setZoom(zoom / 1.5));
+els.zoomFit.addEventListener('click', () => setZoom(1));
+
+els.wrap.addEventListener('wheel', (e) => {
+  if (!e.ctrlKey || !origData) return;
+  e.preventDefault();
+  setZoom(zoom * (e.deltaY < 0 ? 1.25 : 0.8), { x: e.clientX, y: e.clientY });
+}, { passive: false });
+
+window.addEventListener('resize', () => {
+  if (!origData) return;
+  computeBaseFit();
+  setZoom(zoom);
 });
 
 els.btnPick.addEventListener('click', () => els.fileInput.click());
@@ -276,3 +398,4 @@ window.addEventListener('beforeunload', () => {
 setMode('erase');
 els.tolVal.textContent = els.tol.value;
 updateButtons();
+updateZoomLabel();
